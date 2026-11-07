@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Monsieur+La+Doulaise&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap" rel="stylesheet">
+  <title>Um céu de corações</title>
+  <style>
+
+  .homemade-apple-regular {
+    font-family: "Homemade Apple", cursive;
+    font-weight: 400;
+    font-size: 5vw;
+    font-style: normal;
+  }
+
+
+  .monsieur-la-doulaise-regular {
+    font-family: "Monsieur La Doulaise", cursive;
+    font-weight: 400;
+    font-size: 8vw;
+    font-style: normal;
+  }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; }
+    body {
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #b11a63;
+      background:
+        radial-gradient(ellipse at 50% 45%, rgba(255,255,255,.9), transparent 60%),
+        linear-gradient(145deg, #ffe3ef 0%, #c2618b 48%, #d672a2 100%);
+    }
+    #hearts {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .message {
+      position: relative;
+      z-index: 1;
+      width: 90%;
+      height: 100%;
+      padding: 42px 28px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.75);
+      border-radius: 28px;
+      background: rgba(255,255,255,.42);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(1px);
+      overflow-y: scroll;
+    }
+    h1 { margin: 0 0 12px; font-size: clamp(2.1rem, 7vw, 3.7rem); font-weight: 500; }
+    p { margin: 0; font-family: Arial, sans-serif; font-size: 1rem; line-height: 1.6; color: #9b4770; }
+    @media (prefers-reduced-motion: reduce) {
+      #hearts { display: none; }
+    }
+
+    .polaroid{
+      width: 150px;
+      padding: 10px 10px 30px 10px;
+      background: #fff;
+      box-shadow:
+      0 1px 1px rgba(0, 0, 0, 0.12),
+      0 2px 2px rgba(0, 0, 0, 0.12),
+      0 4px 4px rgba(0, 0, 0, 0.12),
+      0 8px 8px rgba(0, 0, 0, 0.12);
+      /*transform: rotate(-2deg);*/
+      transition: all 0.3s ease;
+    }
+
+    .polaroid:hover {
+      transform: rotate(5deg) scale(1.02);
+      box-shadow:
+      0 2px 2px rgba(0, 0, 0, 0.15),
+      0 4px 4px rgba(0, 0, 0, 0.15),
+      0 8px 8px rgba(0, 0, 0, 0.15),
+      0 16px 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    
+  </style>
+</head>
+<body>
+  <canvas id="hearts" aria-hidden="true"></canvas>
+  <main class="message">
+    <div class="monsieur-la-doulaise-regular">
+        Ore & Lay
+    </div>
+    <div class="homemade-apple-regular">
+      4ever
+    </div>
+    <h5>
+      meu amor, decidi fazer um site porque achei a ideia legal e porque dá pra colocar muito mais coisa que no papel, é tudo 100% feito por mim (eu tbm vou te dar uma á mão tbm) mas esse eu passei a madrugada fazendo pra te pedir desculpas porque eu me importo muito com vc
+    </h5>
+      
+    
+    
+    <div style="display: flex; padding-left: 45px;">
+      <img src="WhatsApp Image 2026-11-06 at 22.37.44.jpeg" class="polaroid" style="transform: rotate(-2deg);" >
+      <img src="WhatsApp Image 2026-11-06 at 22.47.28.jpeg" class="polaroid" style="transform: rotate(2deg);" >
+    </div>
+
+    <h5>
+      eu realmente te amo muito meu amor, não pensava que iria amar tanto uma pessoa como eu amo vc, do nada, simplismente aconteceu, nossa química dês de que começamos a nos falar já era notável
+      todos os dias penso em vc, como nos conhecemos, se vc está bem, e de a gente no futuro, vc é muito importante para mim, pq se vc estiver triste eu também vou estar, se vc estiver feliz eu também estarei
+      sempre esperei por alguém assim como vc, 
+    </h5>
+    
+  </main>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById("hearts");
+      const ctx = canvas.getContext("2d", { alpha: true });
+      const colors = ["#ff4f91", "#ff78ad", "#f83283", "#ff9bc1", "#e9438a", "#ffb0ce"];
+      const COUNT = 46; // Quantidade limitada para manter a animação leve.
+      const hearts = [];
+      let width = 0, height = 0, lastFrame = 0;
+      const frameInterval = 1000 / 30; // Limita a animação a 30 FPS.
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        // Limita a resolução interna em telas de alta densidade.
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function newHeart(randomY = false) {
+        const size = 10 + Math.random() * 22;
+        return {
+          x: Math.random() * width,
+          y: randomY ? Math.random() * height : height + size,
+          size,
+          speed: 22 + Math.random() * 38,
+          drift: (Math.random() - 0.5) * 18,
+          phase: Math.random() * Math.PI * 2,
+          sway: 8 + Math.random() * 18,
+          alpha: 0.35 + Math.random() * 0.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: (Math.random() - 0.5) * 0.5
+        };
+      }
+
+      function drawHeart(x, y, size, color, alpha, rotation) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        ctx.scale(size / 10, size / 10);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(0, 10);
+        ctx.bezierCurveTo(-25, -5, -15, -20, 0, -9);
+        ctx.bezierCurveTo(15, -20, 25, -5, 0, 10);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function animate(timestamp) {
+        requestAnimationFrame(animate);
+        if (timestamp - lastFrame < frameInterval) return;
+        const dt = Math.min((timestamp - (lastFrame || timestamp)) / 500, 50);
+        lastFrame = timestamp;
+
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < hearts.length; i++) {
+          const h = hearts[i];
+          h.y -= h.speed * dt;
+          h.phase += dt * 1.2;
+          h.x += (h.drift + Math.sin(h.phase) * h.sway) * dt;
+
+          const fadeIn = Math.min(1, (height + 10 - h.y) / 45);
+          const fadeOut = Math.min(1, (h.y + h.size + 10) / 55);
+          drawHeart(h.x, h.y, h.size, h.color, h.alpha * fadeIn * fadeOut, h.rotation);
+
+          if (h.y < -h.size - 15) hearts[i] = newHeart(false);
+          if (h.x < -40) h.x = width + 30;
+          if (h.x > width + 40) h.x = -30;
+        }
+      }
+
+      resize();
+      window.addEventListener("resize", resize, { passive: true });
+      for (let i = 0; i < COUNT; i++) hearts.push(newHeart(true));
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>
