@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caça à Abelhinha</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: system-ui, Arial, sans-serif;
+  color: #3d2b1f;
+  background: linear-gradient(
+    #9de5ff 0%,
+    #d9f6ff 65%,
+    #b7e89b 65%,
+    #8acb70 100%
+  );
+  user-select: none;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.sun {
+  position: absolute;
+  right: 8%;
+  top: 7%;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: #ffe88a;
+  box-shadow: 0 0 45px #ffe88a99;
+}
+
+.cloud {
+  position: absolute;
+  width: 130px;
+  height: 42px;
+  background: #ffffffb8;
+  border-radius: 50px;
+}
+
+.cloud:before,
+.cloud:after {
+  content: "";
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.cloud:before {
+  width: 58px;
+  height: 58px;
+  left: 20px;
+  top: -25px;
+}
+
+.cloud:after {
+  width: 70px;
+  height: 70px;
+  right: 18px;
+  top: -35px;
+}
+
+.c1 {
+  top: 16%;
+  left: 10%;
+}
+
+.c2 {
+  top: 28%;
+  right: 18%;
+  transform: scale(.75);
+}
+
+header {
+  position: absolute;
+  z-index: 5;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%, 650px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.pill {
+  background: #ffffffd9;
+  border: 2px solid white;
+  padding: 10px 17px;
+  border-radius: 18px;
+  font-weight: 800;
+  box-shadow: 0 5px 14px #44778822;
+}
+
+#bee {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100px;
+  height: 80px;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  cursor: crosshair;
+  filter: drop-shadow(0 5px 3px #4d613355);
+}
+
+#bee svg {
+  width: 100%;
+  height: 100%;
+}
+
+#flower {
+  position: absolute;
+  right: -5px;
+  top: 25px;
+  font-size: 28px;
+  transform: rotate(-25deg);
+}
+
+#message {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(90%, 420px);
+  padding: 28px;
+  text-align: center;
+  background: #fffdf2;
+  border: 3px solid white;
+  border-radius: 25px;
+  box-shadow: 0 15px 50px #315d6544;
+}
+
+#message h1 {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 5vw, 38px);
+  color: #8b5b12;
+}
+
+#message p {
+  line-height: 1.5;
+  margin: 8px 0 20px;
+}
+
+select {
+  display: block;
+  width: 100%;
+  margin: 14px 0 18px;
+  padding: 11px 12px;
+  border: 2px solid #f0d28d;
+  border-radius: 12px;
+  background: white;
+  font-size: 15px;
+  font-weight: 700;
+  color: #50340a;
+}
+
+button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 24px;
+  background: #ffbd35;
+  color: #50340a;
+  font-weight: 900;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #d58a17;
+}
+
+button:active {
+  transform: translateY(3px);
+}
+
+#hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffffb8;
+  padding: 9px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.grass {
+  position: absolute;
+  bottom: 0;
+  height: 20%;
+  width: 100%;
+  background: linear-gradient(#8bcf68, #61aa4c);
+  clip-path: polygon(
+    0 20%, 8% 10%, 17% 24%, 25% 4%,
+    34% 20%, 44% 6%, 54% 22%, 65% 5%,
+    74% 20%, 84% 8%, 94% 21%, 100% 10%,
+    100% 100%, 0 100%
+  );
+}
+
+.pop {
+  position: absolute;
+  z-index: 4;
+  font-size: 24px;
+  pointer-events: none;
+  animation: pop .7s ease-out forwards;
+}
+
+@keyframes pop {
+  to {
+    transform: translateY(-45px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@media(max-width:500px) {
+  header {
+    top: 10px;
+  }
+
+  .pill {
+    padding: 8px 11px;
+    font-size: 14px;
+  }
+
+  #bee {
+    width: 85px;
+    height: 68px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="grass"></div>
+
+  <header>
+    <div class="pill">
+      🐝 Pontos: <span id="score">0</span>
+    </div>
+
+    <div class="pill">
+      ⏱️ Tempo: <span id="time">30</span>s
+    </div>
+
+    <div class="pill">
+      🎯 Recorde: <span id="best">0</span>
+    </div>
+  </header>
+
+  <div id="bee" aria-label="Abelha com uma flor">
+
+    <svg viewBox="0 0 120 90"
+         xmlns="http://www.w3.org/2000/svg">
+
+      <ellipse cx="52" cy="23"
+        rx="17" ry="22"
+        fill="white" opacity=".85"
+        stroke="#9bcbd5" stroke-width="2"
+        transform="rotate(-28 52 23)"/>
+
+      <ellipse cx="78" cy="25"
+        rx="17" ry="22"
+        fill="white" opacity=".85"
+        stroke="#9bcbd5" stroke-width="2"
+        transform="rotate(28 78 25)"/>
+
+      <ellipse cx="65" cy="49"
+        rx="38" ry="25"
+        fill="#ffc928"
+        stroke="#563c19"
+        stroke-width="3"/>
+
+      <path d="M49 27 Q40 48 49 71
+               M72 25 Q63 48 73 73"
+        stroke="#49351e"
+        stroke-width="10"
+        fill="none"/>
+
+      <circle cx="94" cy="43" r="3.5"
+        fill="#30251c"/>
+
+      <path d="M98 52q8 5 12-2"
+        fill="none"
+        stroke="#49351e"
+        stroke-width="2"
+        stroke-linecap="round"/>
+
+      <path d="M91 27q8-13 14-8
+               M83 25q-1-14 5-17"
+        stroke="#49351e"
+        stroke-width="2"
+        fill="none"
+        stroke-linecap="round"/>
+
+      <path d="M29 48L13 40 22 58Z"
+        fill="#49351e"/>
+
+      <path d="M48 69l-5 9m22-7 3 9"
+        stroke="#49351e"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+    </svg>
+
+    <span id="flower">🌼</span>
+  </div>
+
+  <div id="message">
+
+    <h1>Caça à Abelhinha! 🐝</h1>
+
+    <p>
+      A abelhinha roubou uma flor do jardim!<br>
+      Toque ou clique nela para marcar pontos.<br>
+      Escolha a dificuldade e tente pegá-la!
+    </p>
+
+    <select id="difficulty">
+
+      <option value="easy">
+        🐌 Fácil — 45 segundos
+      </option>
+
+      <option value="normal" selected>
+        🐝 Normal — 30 segundos
+      </option>
+
+      <option value="hard">
+        ⚡ Difícil — 20 segundos
+      </option>
+
+      <option value="expert">
+        🔥 Insano — 15 segundos
+      </option>
+
+    </select>
+
+    <button id="start">
+      Começar a jogar
+    </button>
+
+  </div>
+
+  <div id="hint">
+    👆 Clique na abelha enquanto ela voa!
+  </div>
+
+</div>
+
+<script>
+
+const game = document.getElementById('game');
+const bee = document.getElementById('bee');
+
+const scoreEl = document.getElementById('score');
+const timeEl = document.getElementById('time');
+const bestEl = document.getElementById('best');
+const message = document.getElementById('message');
+
+let score = 0;
+let time = 30;
+let running = false;
+
+let x = innerWidth / 2;
+let y = innerHeight / 2;
+
+let vx = 3.2;
+let vy = 2.5;
+
+let timer = null;
+let raf = null;
+
+// CONFIGURAÇÃO DOS NÍVEIS
+const levels = {
+
+  easy: {
+    time: 45,
+    speed: 4,
+    max: 7,
+    boost: 1.018
+  },
+
+  normal: {
+    time: 30,
+    speed: 6.5,
+    max: 11,
+    boost: 1.03
+  },
+
+  hard: {
+    time: 20,
+    speed: 9.5,
+    max: 16,
+    boost: 1.045
+  },
+
+  expert: {
+    time: 15,
+    speed: 13,
+    max: 22,
+    boost: 1.06
+  }
+
+};
+
+let settings = levels.normal;
+
+// CARREGAR RECORDE
+bestEl.textContent =
+  localStorage.getItem('beeBest') || 0;
+
+
+// MOVIMENTAÇÃO DA ABELHA
+function moveBee() {
+
+  if (!running) return;
+
+  const w = bee.offsetWidth;
+  const h = bee.offsetHeight;
+
+  x += vx;
+  y += vy;
+
+  // BATER NAS BORDAS
+  if (x < w / 2 + 5 ||
+      x > innerWidth - w / 2 - 5) {
+    vx *= -1;
+  }
+
+  if (y < h / 2 + 85 ||
+      y > innerHeight - h / 2 - 45) {
+    vy *= -1;
+  }
+
+  // MUDANÇAS ALEATÓRIAS DE DIREÇÃO
+  if (Math.random() < 0.018) {
+    vx += (Math.random() - 0.5) * 2;
+    vy += (Math.random() - 0.5) * 2;
+  }
+
+  // LIMITAR VELOCIDADE
+  const speed = Math.hypot(vx, vy);
+
+  if (speed > settings.max) {
+    vx *= settings.max / speed;
+    vy *= settings.max / speed;
+  }
+
+  bee.style.left = x + 'px';
+  bee.style.top = y + 'px';
+
+  raf = requestAnimationFrame(moveBee);
+}
+
+
+// INICIAR JOGO
+function start() {
+
+  cancelAnimationFrame(raf);
+  clearInterval(timer);
+
+  settings =
+    levels[document.getElementById('difficulty').value]
+    || levels.normal;
+
+  score = 0;
+  time = settings.time;
+
+  vx = (Math.random() < 0.5 ? -1 : 1)
+       * settings.speed;
+
+  vy = settings.speed * 0.8;
+
+  scoreEl.textContent = score;
+  timeEl.textContent = time;
+
+  running = true;
+
+  message.style.display = 'none';
+
+  x = innerWidth / 2;
+  y = innerHeight / 2;
+
+  bee.style.left = x + 'px';
+  bee.style.top = y + 'px';
+  bee.style.display = 'block';
+
+  moveBee();
+
+  timer = setInterval(() => {
+
+    time--;
+
+    timeEl.textContent = time;
+
+    if (time <= 0) {
+      endGame();
+    }
+
+  }, 1000);
+
+}
+
+
+// FINALIZAR JOGO
+function endGame() {
+
+  running = false;
+
+  clearInterval(timer);
+  cancelAnimationFrame(raf);
+
+  const best = Math.max(
+    score,
+    Number(localStorage.getItem('beeBest') || 0)
+  );
+
+  localStorage.setItem('beeBest', best);
+
+  bestEl.textContent = best;
+
+  message.innerHTML = `
+    <h1>Tempo esgotado! ⏰</h1>
+
+    <p>
+      Você conseguiu <b>${score} ponto(s)</b>!<br>
+      ${
+        score >= 10
+        ? 'A abelhinha não teve chance! 🏆'
+        : 'Ela foi rápida dessa vez… 😄'
+      }
+    </p>
+
+    <button id="again">
+      Jogar novamente
+    </button>
+  `;
+
+  message.style.display = 'block';
+
+  document.getElementById('again').onclick = start;
+
+}
+
+
+// ACERTAR A ABELHA
+bee.addEventListener('pointerdown', e => {
+
+  if (!running) return;
+
+  e.preventDefault();
+
+  score++;
+
+  scoreEl.textContent = score;
+
+  // EFEITO VISUAL
+  const rect = bee.getBoundingClientRect();
+
+  const p = document.createElement('div');
+
+  p.className = 'pop';
+
+  p.textContent = [
+    '💥',
+    '✨',
+    '🌸',
+    '+1'
+  ][Math.floor(Math.random() * 4)];
+
+  p.style.left =
+    (rect.left + rect.width / 2) + 'px';
+
+  p.style.top =
+    (rect.top + rect.height / 2) + 'px';
+
+  game.appendChild(p);
+
+  setTimeout(() => p.remove(), 700);
+
+  // AUMENTAR VELOCIDADE A CADA ACERTO
+  vx *= settings.boost;
+  vy *= settings.boost;
+
+  const currentSpeed = Math.hypot(vx, vy);
+
+  if (currentSpeed > settings.max) {
+    vx *= settings.max / currentSpeed;
+    vy *= settings.max / currentSpeed;
+  }
+
+  // PEQUENO DESLOCAMENTO ALEATÓRIO
+  x = Math.max(
+    60,
+    Math.min(innerWidth - 60,
+    x + (Math.random() - 0.5) * 100)
+  );
+
+  y = Math.max(
+    110,
+    Math.min(innerHeight - 100,
+    y + (Math.random() - 0.5) * 100)
+  );
+
+});
+
+
+// BOTÃO INICIAR
+document.getElementById('start').onclick = start;
+
+
+// AJUSTAR AO REDIMENSIONAR A TELA
+window.addEventListener('resize', () => {
+
+  x = Math.min(x, innerWidth - 60);
+  y = Math.min(y, innerHeight - 100);
+
+});
+
+bee.style.display = 'none';
+
+</script>
+
+</body>
+</html>
